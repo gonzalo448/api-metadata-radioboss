@@ -1,11 +1,18 @@
+import express from 'express';
+import cors from 'cors';
 import fetch from 'node-fetch';
 import { parseStringPromise } from 'xml2js';
 
-export default async function handler(req, res) {
+const app = express();
+const PORT = process.env.PORT || 3030;
+
+app.use(cors({ origin: '*' }));
+
+app.get('/api/now-playing', async (req, res) => {
   try {
     const radiobossUrl = 'https://ritmoboss.moxapps.shop/?pass=moxradioserver&action=playbackinfo';
-    const imageUrl = 'https://ritmoboss.moxapps.shop/?pass=moxradioserver&action=trackartwork';
-    const streamUrl = 'https://mox.moxapps.shop/stream';
+    const imageUrl = 'https://via.placeholder.com/300x300.png?text=Caratula'; // Imagen temporal válida
+    const streamUrl = 'https://ritmo.moxapps.shop/stream'; // Tu stream real
 
     console.log('📡 Conectando a:', radiobossUrl);
 
@@ -28,7 +35,7 @@ export default async function handler(req, res) {
     const artista = track.$?.ARTIST || 'Desconocido';
     const titulo = track.$?.TITLE || 'Sin título';
 
-    res.status(200).json({
+    res.json({
       artista,
       titulo,
       caratula: imageUrl,
@@ -39,4 +46,8 @@ export default async function handler(req, res) {
     console.error('🚨 Error al obtener metadatos:', error.message);
     res.status(500).json({ error: 'Error al obtener metadatos' });
   }
-}
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 API escuchando en http://localhost:${PORT}/api/now-playing`);
+});
